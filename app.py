@@ -23,10 +23,28 @@ st.markdown("---")
 def load_and_preprocess_data():
     """Load and preprocess the heart disease dataset"""
     try:
-        # Load data with absolute path
+        # Load data with multiple path attempts
         import os
-        csv_path = os.path.join(os.path.dirname(__file__), 'heart.csv')
-        data = pd.read_csv(csv_path)
+        
+        # Try different possible paths
+        possible_paths = [
+            os.path.join(os.path.dirname(__file__), 'heart.csv'),
+            'heart.csv',
+            os.path.join(os.getcwd(), 'heart.csv'),
+        ]
+        
+        data = None
+        for csv_path in possible_paths:
+            if os.path.exists(csv_path):
+                data = pd.read_csv(csv_path)
+                break
+        
+        if data is None:
+            st.error(f"Error loading data: [Errno 2] No such file or directory: 'heart.csv'")
+            st.info(f"Current working directory: {os.getcwd()}")
+            st.info("Please ensure 'heart.csv' is in the same directory as app.py")
+            st.stop()
+        
         data = data.dropna()
         
         # Data cleaning - Replace zero values with median
